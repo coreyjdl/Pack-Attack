@@ -8,6 +8,7 @@ interface Props {
   categories: Category[];
   locations: StorageLocation[];
   tripVehicles: Vehicle[];
+  onUpdate: (patch: Partial<Kit>) => void;
   onSelectItem: (id: string) => void;
   onCycleStatus: (id: string) => void;
   onSetAllStatus: (status: GearStatus) => void;
@@ -20,6 +21,7 @@ export function KitPanel({
   categories,
   locations,
   tripVehicles,
+  onUpdate,
   onSelectItem,
   onCycleStatus,
   onSetAllStatus,
@@ -58,6 +60,35 @@ export function KitPanel({
           </button>
         </div>
       </header>
+
+      <section className="card">
+        <h3>Kit assignment</h3>
+        <div className="field-grid">
+          <label>
+            Category
+            <select
+              value={kit.categoryId}
+              onChange={(e) => onUpdate({ categoryId: e.target.value || categories[0]?.id || kit.categoryId })}
+            >
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Location
+            <select
+              value={kit.locationId ?? ""}
+              onChange={(e) => onUpdate({ locationId: e.target.value || undefined })}
+            >
+              <option value="">Unassigned</option>
+              {locations.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </section>
 
       <section className="card">
         <h3>Contents</h3>

@@ -75,8 +75,10 @@ export function LocationTree({
           items={unassigned}
           expanded={expanded}
           selection={selection}
-          search=""
+          search={search}
           onToggle={onToggle}
+          onSelectGroup={() => onSelect({ kind: "location", id: UNASSIGNED })}
+          isSelectedGroup={selection.kind === "location" && selection.id === UNASSIGNED}
           onSelectItem={(id) => onSelect({ kind: "item", id })}
           labelClassName="muted-row"
         />

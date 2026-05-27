@@ -1819,6 +1819,39 @@ button.ghost {
   padding: 8px 10px;
 }
 
+.sidebar-priority-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 8px;
+}
+
+.priority-nav-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  color: var(--ink);
+  border: 1px solid rgba(216, 125, 63, 0.55);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(216, 125, 63, 0.22), rgba(216, 125, 63, 0.1));
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.priority-nav-btn:hover {
+  background: linear-gradient(180deg, rgba(216, 125, 63, 0.3), rgba(216, 125, 63, 0.16));
+}
+
+.priority-nav-btn.active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
 .mode-tabs .tab,
 .view-tabs .tab {
   border: 1px solid var(--line);
@@ -1867,29 +1900,6 @@ button.ghost {
 .picker-foot button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .empty-state-full { padding: 40px; text-align: center; }
-
-/* Trip Overview — prominent, separated from view tabs */
-.home-btn {
-  display: block;
-  width: 100%;
-  margin: 10px 0 8px;
-  padding: 10px 12px;
-  background: linear-gradient(180deg, rgba(216,125,63,0.22), rgba(216,125,63,0.10));
-  color: inherit;
-  border: 1px solid rgba(216,125,63,0.55);
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-  letter-spacing: 0.02em;
-}
-.home-btn:hover { background: linear-gradient(180deg, rgba(216,125,63,0.30), rgba(216,125,63,0.16)); }
-.home-btn.active {
-  background: rgba(216,125,63,0.35);
-  border-color: rgba(216,125,63,0.85);
-  box-shadow: 0 0 0 2px rgba(216,125,63,0.25);
-}
 
 /* Mode tabs — make the four-up grid clearer */
 .mode-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px; }

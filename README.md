@@ -1,6 +1,6 @@
 # Pack Attack
 
-Cross-platform synced packing list app for ADV and overland trips.
+Cross-platform packing list app for ADV and overland trips.
 
 ## Monorepo Layout
 - apps/mobile: Expo React Native Android app
@@ -59,12 +59,7 @@ Replace `emulator-5554` with your connected emulator/device ID.
 - See docs/product-blueprint.md for roadmap and feature plan.
 
 ## Current Capabilities
-- Supabase email/password auth and cloud sync in mobile + desktop
 - Workflowy-style nested navigation including FAK drill-down
 - Export raw CSV and checklist markdown (desktop)
 - Print-friendly desktop view
 - Extensible storage locations (left/right panniers by default, plus custom bags)
-
-## Sync Setup
-- Copy values from .env.example into your local env files.
-- Run the SQL in docs/supabase-setup.md to create table + RLS policies.

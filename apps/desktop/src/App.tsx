@@ -23,7 +23,6 @@ import {
 import { Lightbox } from "./components/Lightbox";
 import { PrintOverlay } from "./components/PrintOverlay";
 import { TripSummaryPrint } from "./components/TripSummaryPrint";
-import { TripSwitcher } from "./components/TripSwitcher";
 import { VehiclesCard } from "./components/Vehicles";
 import { LibraryPicker } from "./components/LibraryPicker";
 import { ItemChecklist } from "./components/ItemChecklist";
@@ -124,12 +123,16 @@ export function App(): JSX.Element {
   const kitById = useMemo(() => new Map(kits.map((k) => [k.id, k])), [kits]);
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
+  function locationBucketKey(it: GearItem): string {
+    return it.locationId && locationById.has(it.locationId) ? it.locationId : UNASSIGNED;
+  }
+
   const itemsByLocation = useMemo(() => {
     const map = new Map<string, GearItem[]>();
     for (const loc of locations) map.set(loc.id, []);
     map.set(UNASSIGNED, []);
     for (const it of items) {
-      const key = it.locationId && locationById.has(it.locationId) ? it.locationId : UNASSIGNED;
+      const key = locationBucketKey(it);
       map.get(key)!.push(it);
     }
     return map;
@@ -1157,7 +1160,11 @@ export function App(): JSX.Element {
 
   const selectedItem = selection.kind === "item" ? items.find((i) => i.id === selection.id) : undefined;
   const selectedKit = selection.kind === "kit" ? kits.find((k) => k.id === selection.id) : undefined;
-  const selectedLocation = selection.kind === "location" ? locations.find((l) => l.id === selection.id) : undefined;
+  const selectedLocation: StorageLocation | undefined = selection.kind === "location"
+    ? selection.id === UNASSIGNED
+      ? { id: UNASSIGNED, name: "Unassigned location", kind: "other", vehicleId: trip.vehicleIds[0] ?? "" }
+      : locations.find((l) => l.id === selection.id)
+    : undefined;
   const tripVehicles = vehicles.filter((v) => trip.vehicleIds.includes(v.id));
   const totalCount = items.length;
   const packedCount = items.filter((i) => i.status === "packed").length;
@@ -1169,24 +1176,27 @@ export function App(): JSX.Element {
           <h1>Pack Attack</h1>
         </header>
 
-        <TripSwitcher
-          trips={trips}
-          activeTripId={trip.id}
-          onSelect={(id) => {
-            setActiveTripId(id);
-            setMode("trip");
-          }}
-          onManage={() => setMode("trips")}
-        />
-
-        <button
-          type="button"
-          className={mode === "overview" ? "home-btn active" : "home-btn"}
-          onClick={() => setMode("overview")}
-          title="Trip overview — home"
-        >
-          ⌂ Trip Overview
-        </button>
+        <div className="sidebar-priority-actions">
+          <button
+            type="button"
+            className={mode === "overview" ? "priority-nav-btn active" : "priority-nav-btn"}
+            onClick={() => setMode("overview")}
+            title="Trip overview — home"
+          >
+            Trip Overview
+          </button>
+          <button
+            type="button"
+            className={mode === "mobile-pack" ? "priority-nav-btn active" : "priority-nav-btn"}
+            onClick={() => {
+              setSelection({ kind: "home" });
+              setMode("mobile-pack");
+            }}
+            title="One-handed checklist and tasks for phone use"
+          >
+            Quick Pack
+          </button>
+        </div>
 
         <nav className="mode-tabs" aria-label="Workspace">
           <button
@@ -1196,17 +1206,6 @@ export function App(): JSX.Element {
             title="Pack the currently active trip"
           >
             Packing
-          </button>
-          <button
-            type="button"
-            className={mode === "mobile-pack" ? "tab active" : "tab"}
-            onClick={() => {
-              setSelection({ kind: "home" });
-              setMode("mobile-pack");
-            }}
-            title="One-handed checklist and tasks for phone use"
-          >
-            Quick Pack
           </button>
           <button
             type="button"
@@ -1459,11 +1458,11 @@ export function App(): JSX.Element {
               setMode("trip");
             }}
             onCycleStatus={tripCycleStatus}
-            onPackGroup={(itemIds) => {
+            onSetGroupStatus={(itemIds, status) => {
               patchActiveTrip((t) => {
                 const itemRefs = { ...t.itemRefs };
                 for (const id of itemIds) {
-                  if (itemRefs[id]) itemRefs[id] = { ...itemRefs[id], status: "packed" };
+                  if (itemRefs[id]) itemRefs[id] = { ...itemRefs[id], status };
                 }
                 return { ...t, itemRefs };
               });
@@ -1479,7 +1478,6 @@ export function App(): JSX.Element {
             categoryLookup={(id: string): string | undefined =>
               categories.find((c) => c.id === id)?.name
             }
-            onToggleTask={(id, done) => tripUpdateTask(id, { done })}
           />
         )}
 
@@ -1595,8 +1593,17 @@ export function App(): JSX.Element {
             categories={categories}
             onSelectItem={(id) => setSelection({ kind: "item", id })}
             onCycleStatus={tripCycleStatus}
+            onSetGroupStatus={(itemIds, status) => {
+              patchActiveTrip((t) => {
+                const itemRefs = { ...t.itemRefs };
+                for (const id of itemIds) {
+                  if (itemRefs[id]) itemRefs[id] = { ...itemRefs[id], status };
+                }
+                return { ...t, itemRefs };
+              });
+            }}
             onExportScope={() =>
-              exportScope((it) => it.locationId === selectedLocation.id, `-${selectedLocation.name}`)
+              exportScope((it) => locationBucketKey(it) === selectedLocation.id, `-${selectedLocation.name}`)
             }
           />
         )}
@@ -1608,6 +1615,7 @@ export function App(): JSX.Element {
             categories={categories}
             locations={locations}
             tripVehicles={tripVehicles}
+            onUpdate={(patch) => routeKitUpdate(selectedKit.id, patch)}
             onSelectItem={(id) => setSelection({ kind: "item", id })}
             onCycleStatus={tripCycleStatus}
             onSetAllStatus={(status) => {

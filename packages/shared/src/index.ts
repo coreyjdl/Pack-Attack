@@ -414,5 +414,4 @@ export function makeDefaultStorageLocations(vehicleId: string): StorageLocation[
   ];
 }
 
-export * from "./sync";
 export * from "./exporters";

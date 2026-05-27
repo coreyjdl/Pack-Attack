@@ -1,30 +1,18 @@
 import { useMemo } from "react";
-import type { GearItem, GearStatus, Trip, TripTask } from "@pack-attack/shared";
-import { ItemChecklist } from "../components/ItemChecklist";
-import { STATUS_GLYPH } from "../constants";
+import type { GearItem, GearStatus, Trip } from "@pack-attack/shared";
+import { KitGroupedChecklist } from "../components/KitGroupedChecklist";
 
 interface Props {
   trip: Trip;
   items: GearItem[];
   onSelectItem: (id: string) => void;
   onCycleStatus: (id: string) => void;
-  onPackGroup: (itemIds: string[]) => void;
+  onSetGroupStatus: (itemIds: string[], status: GearStatus) => void;
   statusFilter: GearStatus | "all";
   onStatusFilter: (status: GearStatus | "all") => void;
   kitLookup: (id?: string) => string | undefined;
   locationLookup: (id?: string) => string | undefined;
   categoryLookup: (id: string) => string | undefined;
-  onToggleTask: (id: string, done: boolean) => void;
-}
-
-function taskDueLabel(task: TripTask): string {
-  if (task.dueDate) {
-    return `Due ${task.dueDate}`;
-  }
-  if (task.dueOffsetDays === undefined) return "";
-  const d = task.dueOffsetDays;
-  if (d === 0) return "Day of trip";
-  return d < 0 ? `${-d}d before` : `${d}d after start`;
 }
 
 export function MobilePackPanel({
@@ -32,13 +20,12 @@ export function MobilePackPanel({
   items,
   onSelectItem,
   onCycleStatus,
-  onPackGroup,
+  onSetGroupStatus,
   statusFilter,
   onStatusFilter,
   kitLookup,
   locationLookup,
-  categoryLookup,
-  onToggleTask
+  categoryLookup
 }: Props): JSX.Element {
   const counts = useMemo(() => {
     const packed = items.filter((i) => i.status === "packed").length;
@@ -62,39 +49,6 @@ export function MobilePackPanel({
       });
   }, [items, statusFilter]);
 
-  const grouped = useMemo(() => {
-    const byKit = new Map<string, GearItem[]>();
-    const loose: GearItem[] = [];
-    for (const item of filteredItems) {
-      if (item.kitId) {
-        const arr = byKit.get(item.kitId) ?? [];
-        arr.push(item);
-        byKit.set(item.kitId, arr);
-      } else {
-        loose.push(item);
-      }
-    }
-
-    const kitGroups = Array.from(byKit.entries())
-      .map(([kitId, kitItems]) => ({
-        id: `kit:${kitId}`,
-        title: kitLookup(kitId) ?? "Kit",
-        items: kitItems.sort((a, b) => a.name.localeCompare(b.name))
-      }))
-      .sort((a, b) => a.title.localeCompare(b.title));
-
-    if (loose.length > 0) {
-      kitGroups.push({
-        id: "kit:loose",
-        title: "Loose items",
-        items: loose.sort((a, b) => a.name.localeCompare(b.name))
-      });
-    }
-
-    return kitGroups;
-  }, [filteredItems, kitLookup]);
-
-  const openTasks = (trip.tasks ?? []).filter((t) => !t.done);
   const total = items.length;
   const pct = total === 0 ? 0 : Math.round((counts.packed / total) * 100);
 
@@ -147,73 +101,16 @@ export function MobilePackPanel({
 
       <section className="card mobile-pack-checklist">
         <h3>Packing checklist by kit</h3>
-        {grouped.length === 0 ? (
-          <p className="muted">No items match this filter.</p>
-        ) : (
-          <div className="mobile-pack-groups">
-            {grouped.map((group) => {
-              const packedCount = group.items.filter((i) => i.status === "packed").length;
-              const allPacked = group.items.length > 0 && packedCount === group.items.length;
-              const kitStatus: GearStatus =
-                packedCount === 0 ? "missing" : allPacked ? "packed" : "staged";
-              return (
-                <section key={group.id} className="mobile-pack-group">
-                  <header className="mobile-pack-group-head">
-                    <div>
-                      <strong>{group.title}</strong>
-                      <span className="muted">{packedCount}/{group.items.length} packed</span>
-                    </div>
-                    <div className="mobile-pack-group-action">
-                      <button
-                        type="button"
-                        className={`status-toggle status-${kitStatus}`}
-                        onClick={() => onPackGroup(group.items.map((i) => i.id))}
-                        disabled={allPacked}
-                        aria-label={allPacked ? `${group.title} packed` : `Pack full kit ${group.title}`}
-                        title={allPacked ? "Kit packed" : "Pack full kit"}
-                      >
-                        {STATUS_GLYPH[kitStatus]}
-                      </button>
-                      <span className="muted">Pack kit</span>
-                    </div>
-                  </header>
-                  <ItemChecklist
-                    items={group.items}
-                    onSelectItem={onSelectItem}
-                    onCycleStatus={onCycleStatus}
-                    kitLookup={kitLookup}
-                    locationLookup={locationLookup}
-                    categoryLookup={categoryLookup}
-                  />
-                </section>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section className="card mobile-pack-tasks">
-        <h3>Open tasks ({openTasks.length})</h3>
-        {openTasks.length === 0 ? (
-          <p className="muted">No open tasks.</p>
-        ) : (
-          <ul className="task-list mobile-task-list">
-            {openTasks.slice(0, 10).map((task) => (
-              <li key={task.id} className="task-row">
-                <button
-                  type="button"
-                  className="task-toggle status-missing"
-                  onClick={() => onToggleTask(task.id, true)}
-                  aria-label={`Mark ${task.title} complete`}
-                >
-                  {STATUS_GLYPH.missing}
-                </button>
-                <span className="task-title">{task.title}</span>
-                <span className="task-due muted">{taskDueLabel(task)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <KitGroupedChecklist
+          items={filteredItems}
+          kitLookup={kitLookup}
+          locationLookup={locationLookup}
+          categoryLookup={categoryLookup}
+          onSelectItem={onSelectItem}
+          onCycleStatus={onCycleStatus}
+          onSetGroupStatus={onSetGroupStatus}
+          emptyText="No items match this filter."
+        />
       </section>
     </div>
   );
