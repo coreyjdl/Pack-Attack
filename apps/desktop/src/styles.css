@@ -843,6 +843,32 @@ button:not(.status-toggle):not(.task-toggle):not(.shop-confirm):not(.icon-btn):n
   letter-spacing: 0.8px;
 }
 
+.field-grid .field-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.field-grid .field-row.toggle-row {
+  grid-template-columns: 124px 180px;
+  column-gap: 10px;
+  justify-content: start;
+}
+
+.field-grid .field-row.toggle-row .field-toggle {
+  padding-bottom: 0;
+}
+
+.field-grid .field-row.toggle-row .toggle-cell {
+  width: 124px;
+}
+
+.field-grid .field-row.toggle-row label.compact-field {
+  width: 180px;
+}
+
 textarea.full {
   width: 100%;
   background: var(--surface);
@@ -1330,6 +1356,14 @@ button.ghost {
 
   .field-grid label.wide {
     grid-column: 1 / -1;
+  }
+
+  .field-grid .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .field-grid .field-row.toggle-row {
+    grid-template-columns: 1fr;
   }
 }
 

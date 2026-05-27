@@ -188,47 +188,51 @@ export function ItemPanel({
               }
             />
           </label>
-          <div className="field-toggle">
-            <span>Consumable</span>
-            <button
-              type="button"
-              className={item.consumable ? "chip active" : "chip"}
-              aria-pressed={!!item.consumable}
-              onClick={() => onUpdate({ consumable: item.consumable ? undefined : true })}
-            >
-              {item.consumable ? "Yes" : "No"}
-            </button>
-          </div>
-          {item.consumable && (
-            <label>
+          <div className="field-row wide toggle-row">
+            <div className="field-toggle toggle-cell">
+              <span>Consumable</span>
+              <button
+                type="button"
+                className={item.consumable ? "status-toggle status-packed" : "status-toggle status-missing"}
+                aria-pressed={!!item.consumable}
+                onClick={() => onUpdate({ consumable: item.consumable ? undefined : true })}
+                title={item.consumable ? "Set consumable to no" : "Set consumable to yes"}
+              >
+                {item.consumable ? STATUS_GLYPH.packed : STATUS_GLYPH.missing}
+              </button>
+            </div>
+            <label className="compact-field">
               Unit
               <input
                 type="text"
-                placeholder="L, oz, ct…"
+                placeholder="L, oz, ct..."
                 value={item.consumableUnit ?? ""}
                 onChange={(e) => onUpdate({ consumableUnit: e.target.value || undefined })}
               />
             </label>
-          )}
-          <div className="field-toggle">
-            <span>Perishable</span>
-            <button
-              type="button"
-              className={item.perishable ? "chip active" : "chip"}
-              aria-pressed={!!item.perishable}
-              onClick={() => onUpdate({ perishable: item.perishable ? undefined : true })}
-            >
-              {item.perishable ? "Yes" : "No"}
-            </button>
           </div>
-          <label>
-            Expires
-            <input
-              type="date"
-              value={item.expiresAt ?? ""}
-              onChange={(e) => onUpdate({ expiresAt: e.target.value || undefined })}
-            />
-          </label>
+          <div className="field-row wide toggle-row">
+            <div className="field-toggle toggle-cell">
+              <span>Perishable</span>
+              <button
+                type="button"
+                className={item.perishable ? "status-toggle status-packed" : "status-toggle status-missing"}
+                aria-pressed={!!item.perishable}
+                onClick={() => onUpdate({ perishable: item.perishable ? undefined : true })}
+                title={item.perishable ? "Set perishable to no" : "Set perishable to yes"}
+              >
+                {item.perishable ? STATUS_GLYPH.packed : STATUS_GLYPH.missing}
+              </button>
+            </div>
+            <label className="compact-field">
+              Expires
+              <input
+                type="date"
+                value={item.expiresAt ?? ""}
+                onChange={(e) => onUpdate({ expiresAt: e.target.value || undefined })}
+              />
+            </label>
+          </div>
           <label className="wide">
             Product / info link
             <input
