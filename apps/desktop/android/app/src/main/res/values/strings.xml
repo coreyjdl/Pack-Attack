@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Pack Attack</string>
+    <string name="title_activity_main">Pack Attack</string>
+    <string name="package_name">com.packattack.app</string>
+    <string name="custom_url_scheme">com.packattack.app</string>
+</resources>

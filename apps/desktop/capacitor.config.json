@@ -1,0 +1,8 @@
+{
+  "appId": "com.packattack.app",
+  "appName": "Pack Attack",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}

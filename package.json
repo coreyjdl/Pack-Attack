@@ -1,0 +1,16 @@
+{
+  "name": "pack-attack",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Synced ADV/overland packing list app for Android and desktop",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:mobile": "npm run dev -w apps/mobile",
+    "dev:desktop": "npm run dev -w apps/desktop",
+    "build": "npm run build -w packages/shared && npm run build -w apps/desktop",
+    "typecheck": "npm run typecheck -w packages/shared && npm run typecheck -w apps/mobile && npm run typecheck -w apps/desktop"
+  }
+}
